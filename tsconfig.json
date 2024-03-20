@@ -3,7 +3,6 @@
   "compilerOptions": {
     "baseUrl": "./",
     "paths": {
-      "*": ["./app/*"],
       "components": ["./app/components"],
       "hooks": ["./app/hooks"],
       "modules": ["./app/modules"],
