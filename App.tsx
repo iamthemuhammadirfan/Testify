@@ -1,118 +1,92 @@
-/**
- * Sample React Native App
- * https://github.com/facebook/react-native
- *
- * @format
- */
-
-import React from 'react';
-import type {PropsWithChildren} from 'react';
 import {
-  SafeAreaView,
-  ScrollView,
   StatusBar,
   StyleSheet,
   Text,
-  useColorScheme,
+  TouchableOpacity,
   View,
 } from 'react-native';
+import React, {useCallback, useState} from 'react';
+import Animated, {useAnimatedStyle, withTiming} from 'react-native-reanimated';
+import useShaking from 'hooks/useShaking';
 
-import {
-  Colors,
-  DebugInstructions,
-  Header,
-  LearnMoreLinks,
-  ReloadInstructions,
-} from 'react-native/Libraries/NewAppScreen';
+const App = () => {
+  const [count, setCount] = useState(0);
+  const {isShaking, shake, shakingStyle} = useShaking();
 
-type SectionProps = PropsWithChildren<{
-  title: string;
-}>;
+  const onIncrement = useCallback(() => {
+    setCount(prev => prev + 1);
+  }, []);
 
-function Section({children, title}: SectionProps): React.JSX.Element {
-  const isDarkMode = useColorScheme() === 'dark';
+  const onDecrement = useCallback(() => {
+    setCount(prev => {
+      if (prev === 0) {
+        shake();
+        return prev;
+      }
+      return prev - 1;
+    });
+  }, []);
+
+  const rErrorStyle = useAnimatedStyle(() => {
+    return {
+      color: withTiming(isShaking.value ? 'red' : 'black', {
+        duration: 50,
+      }),
+    };
+  });
+
   return (
-    <View style={styles.sectionContainer}>
-      <Text
-        style={[
-          styles.sectionTitle,
-          {
-            color: isDarkMode ? Colors.white : Colors.black,
-          },
-        ]}>
-        {title}
-      </Text>
-      <Text
-        style={[
-          styles.sectionDescription,
-          {
-            color: isDarkMode ? Colors.light : Colors.dark,
-          },
-        ]}>
-        {children}
-      </Text>
+    <View style={styles.container}>
+      <StatusBar barStyle="dark-content" backgroundColor="white" />
+
+      <Animated.Text style={[styles.text, shakingStyle, rErrorStyle]}>
+        {count}
+      </Animated.Text>
+      <View style={styles.buttonsContainer}>
+        <TouchableOpacity style={styles.button} onPress={onDecrement}>
+          <Text style={styles.icon}>-</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.button} onPress={onIncrement}>
+          <Text style={styles.icon}>+</Text>
+        </TouchableOpacity>
+      </View>
     </View>
   );
-}
-
-function App(): React.JSX.Element {
-  const isDarkMode = useColorScheme() === 'dark';
-
-  const backgroundStyle = {
-    backgroundColor: isDarkMode ? Colors.darker : Colors.lighter,
-  };
-
-  return (
-    <SafeAreaView style={backgroundStyle}>
-      <StatusBar
-        barStyle={isDarkMode ? 'light-content' : 'dark-content'}
-        backgroundColor={backgroundStyle.backgroundColor}
-      />
-      <ScrollView
-        contentInsetAdjustmentBehavior="automatic"
-        style={backgroundStyle}>
-        <Header />
-        <View
-          style={{
-            backgroundColor: isDarkMode ? Colors.black : Colors.white,
-          }}>
-          <Section title="Step One">
-            Edit <Text style={styles.highlight}>App.tsx</Text> to change this
-            screen and then come back to see your edits.
-          </Section>
-          <Section title="See Your Changes">
-            <ReloadInstructions />
-          </Section>
-          <Section title="Debug">
-            <DebugInstructions />
-          </Section>
-          <Section title="Learn More">
-            Read the docs to discover what to do next:
-          </Section>
-          <LearnMoreLinks />
-        </View>
-      </ScrollView>
-    </SafeAreaView>
-  );
-}
-
-const styles = StyleSheet.create({
-  sectionContainer: {
-    marginTop: 32,
-    paddingHorizontal: 24,
-  },
-  sectionTitle: {
-    fontSize: 24,
-    fontWeight: '600',
-  },
-  sectionDescription: {
-    marginTop: 8,
-    fontSize: 18,
-    fontWeight: '400',
-  },
-  highlight: {
-    fontWeight: '700',
-  },
-});
+};
 
 export default App;
+
+const styles = StyleSheet.create({
+  button: {
+    width: 44,
+    height: 44,
+    backgroundColor: 'black',
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderRadius: 22,
+  },
+  buttonsContainer: {
+    flexDirection: 'row',
+    position: 'absolute',
+    bottom: 50,
+    right: 20,
+    columnGap: 20,
+  },
+  container: {
+    flex: 1,
+    backgroundColor: 'white',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  icon: {
+    fontSize: 32,
+    color: 'white',
+    fontWeight: 'bold',
+    lineHeight: 32 * 1.1,
+  },
+  text: {
+    fontSize: 90,
+    color: 'black',
+    fontWeight: 'bold',
+  },
+});
